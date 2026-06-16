@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ToolTime — Die Handwerker-App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            heading: ['"Space Grotesk"', 'sans-serif'],
+            body: ['"DM Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              orange: '#F97316',
+              yellow: '#FBBF24',
+              dark:   '#0D0D0D',
+              card:   '#161616',
+              border: '#242424',
+              muted:  '#8A8A8A',
+            }
+          },
+          animation: {
+            'fade-up': 'fadeUp 0.6s ease forwards',
+            'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeUp: {
+              '0%':   { opacity: '0', transform: 'translateY(24px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { boxShadow: '0 0 20px rgba(249,115,22,0.3)' },
+              '50%':       { boxShadow: '0 0 40px rgba(249,115,22,0.6)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { background-color: #0D0D0D; color: #F8FAFC; font-family: 'DM Sans', sans-serif; }
+    h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; }
+
+    .orange-glow { text-shadow: 0 0 40px rgba(249,115,22,0.5); }
+    .card-hover { transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+    .card-hover:hover { transform: translateY(-4px); border-color: #F97316; box-shadow: 0 8px 32px rgba(249,115,22,0.15); }
+
+    .noise-bg {
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    }
+
+    .grid-bg {
+      background-image: linear-gradient(rgba(249,115,22,0.04) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(249,115,22,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .stat-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, #F97316, #FBBF24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body class="noise-bg">
+
+  <!-- NAV -->
+  <nav class="fixed top-4 left-4 right-4 z-50 flex items-center justify-between px-6 py-3 bg-[#161616]/90 backdrop-blur-md border border-[#242424] rounded-2xl max-w-7xl mx-auto">
+    <div class="flex items-center gap-2">
+      <!-- Logo -->
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="#F97316"/>
+        <path d="M8 24L14 10L18 18L21 14L24 24" stroke="#0D0D0D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="font-heading font-bold text-xl tracking-tight">ToolTime</span>
+    </div>
+    <ul class="hidden md:flex items-center gap-8 text-sm text-brand-muted font-medium">
+      <li><a href="#features" class="hover:text-white transition-colors duration-200 cursor-pointer">Features</a></li>
+      <li><a href="#how" class="hover:text-white transition-colors duration-200 cursor-pointer">So funktionierts</a></li>
+      <li><a href="#pricing" class="hover:text-white transition-colors duration-200 cursor-pointer">Preise</a></li>
+      <li><a href="#reviews" class="hover:text-white transition-colors duration-200 cursor-pointer">Bewertungen</a></li>
+    </ul>
+    <div class="flex items-center gap-3">
+      <a href="#" class="hidden md:block text-sm text-brand-muted hover:text-white transition-colors duration-200 cursor-pointer font-medium">Anmelden</a>
+      <a href="#cta" class="bg-brand-orange hover:bg-orange-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors duration-200 cursor-pointer">Kostenlos starten</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="relative min-h-screen flex flex-col items-center justify-center text-center px-4 pt-32 pb-20 grid-bg overflow-hidden">
+    <!-- Background glow -->
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-orange/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-5xl mx-auto">
+      <div class="inline-flex items-center gap-2 bg-brand-orange/10 border border-brand-orange/30 text-brand-orange text-sm font-semibold px-4 py-2 rounded-full mb-8">
+        <span class="w-2 h-2 bg-brand-orange rounded-full animate-pulse"></span>
+        Neu: KI-gestützte Auftragsplanung
+      </div>
+
+      <h1 class="font-heading font-black text-5xl md:text-7xl lg:text-8xl tracking-tight leading-none mb-8 orange-glow">
+        Handwerk.<br/>
+        <span class="text-brand-orange">Digital.</span><br/>
+        Profitabel.
+      </h1>
+
+      <p class="text-lg md:text-xl text-brand-muted max-w-2xl mx-auto mb-12 leading-relaxed">
+        ToolTime ist die All-in-One-Software für Handwerksbetriebe.
+        Aufträge, Angebote, Rechnungen und Team — alles in einer App.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <a href="#cta" class="w-full sm:w-auto bg-brand-orange hover:bg-orange-500 text-white font-bold text-lg px-8 py-4 rounded-2xl transition-all duration-200 cursor-pointer shadow-[0_0_24px_rgba(249,115,22,0.4)] hover:shadow-[0_0_40px_rgba(249,115,22,0.6)]">
+          Kostenlos 14 Tage testen
+        </a>
+        <a href="#how" class="w-full sm:w-auto flex items-center justify-center gap-2 border border-[#333] hover:border-[#555] text-white font-semibold text-lg px-8 py-4 rounded-2xl transition-all duration-200 cursor-pointer">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 7l5 3-5 3V7z" fill="currentColor"/>
+          </svg>
+          Demo ansehen
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-6 max-w-2xl mx-auto border-t border-[#242424] pt-12">
+        <div>
+          <div class="stat-number">12.000+</div>
+          <div class="text-brand-muted text-sm mt-1">Handwerksbetriebe</div>
+        </div>
+        <div>
+          <div class="stat-number">4,8 ★</div>
+          <div class="text-brand-muted text-sm mt-1">App Store Rating</div>
+        </div>
+        <div>
+          <div class="stat-number">98%</div>
+          <div class="text-brand-muted text-sm mt-1">Weiterempfehlungsrate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating mockup -->
+    <div class="relative z-10 mt-20 w-full max-w-4xl mx-auto px-4">
+      <div class="bg-[#161616] border border-[#242424] rounded-3xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.8)]">
+        <!-- Fake browser bar -->
+        <div class="flex items-center gap-2 px-5 py-3 border-b border-[#242424] bg-[#111]">
+          <div class="w-3 h-3 rounded-full bg-[#333]"></div>
+          <div class="w-3 h-3 rounded-full bg-[#333]"></div>
+          <div class="w-3 h-3 rounded-full bg-[#333]"></div>
+          <div class="flex-1 mx-4 h-6 bg-[#1E1E1E] rounded-lg flex items-center px-3">
+            <span class="text-xs text-brand-muted">app.tooltime.de/dashboard</span>
+          </div>
+        </div>
+        <!-- Dashboard UI -->
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2 space-y-3">
+            <div class="text-xs text-brand-muted font-semibold uppercase tracking-wider mb-3">Aktive Aufträge</div>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-brand-orange/20 flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M2 4h12v8H2z" rx="1"/></svg>
+                  </div>
+                  <div>
+                    <div class="text-sm font-semibold">Badezimmer Sanierung — Müller</div>
+                    <div class="text-xs text-brand-muted">Fällig: 24. Juni 2026</div>
+                  </div>
+                </div>
+                <span class="text-xs bg-brand-orange/20 text-brand-orange px-3 py-1 rounded-full font-semibold">In Arbeit</span>
+              </div>
+              <div class="flex items-center justify-between bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="#22c55e" aria-hidden="true"><path d="M2 8l4 4 8-8" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+                  </div>
+                  <div>
+                    <div class="text-sm font-semibold">Dachrinne reinigen — Schmidt</div>
+                    <div class="text-xs text-brand-muted">Abgeschlossen: 14. Juni 2026</div>
+                  </div>
+                </div>
+                <span class="text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full font-semibold">Erledigt</span>
+              </div>
+              <div class="flex items-center justify-between bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="#3b82f6" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="#3b82f6" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+                  </div>
+                  <div>
+                    <div class="text-sm font-semibold">Elektroinstallation — Neubau Weber</div>
+                    <div class="text-xs text-brand-muted">Start: 01. Juli 2026</div>
+                  </div>
+                </div>
+                <span class="text-xs bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full font-semibold">Geplant</span>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="text-xs text-brand-muted font-semibold uppercase tracking-wider mb-3">Übersicht</div>
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 text-center">
+              <div class="text-2xl font-black font-heading text-brand-orange">€ 48.200</div>
+              <div class="text-xs text-brand-muted mt-1">Umsatz Juni</div>
+            </div>
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 text-center">
+              <div class="text-2xl font-black font-heading text-white">23</div>
+              <div class="text-xs text-brand-muted mt-1">Offene Aufträge</div>
+            </div>
+            <div class="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 text-center">
+              <div class="text-2xl font-black font-heading text-green-400">7</div>
+              <div class="text-xs text-brand-muted mt-1">Mitarbeiter aktiv</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGOS / TRUSTED BY -->
+  <section class="py-16 border-y border-[#1A1A1A] bg-[#0A0A0A]">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <p class="text-brand-muted text-sm font-medium uppercase tracking-widest mb-10">Vertrauen von über 12.000 Betrieben</p>
+      <div class="flex flex-wrap items-center justify-center gap-10 opacity-40">
+        <span class="font-heading font-black text-2xl tracking-tight">Elektro Braun</span>
+        <span class="font-heading font-black text-2xl tracking-tight">Sanitär König</span>
+        <span class="font-heading font-black text-2xl tracking-tight">Dach & Fach GmbH</span>
+        <span class="font-heading font-black text-2xl tracking-tight">Maler Richter</span>
+        <span class="font-heading font-black text-2xl tracking-tight">Bau-Witt KG</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="py-28 px-4 max-w-7xl mx-auto">
+    <div class="text-center mb-20">
+      <span class="text-brand-orange font-semibold text-sm uppercase tracking-widest">Features</span>
+      <h2 class="font-heading font-black text-4xl md:text-6xl mt-4 leading-tight">
+        Alles, was dein Betrieb<br/>
+        <span class="text-brand-orange">wirklich braucht</span>
+      </h2>
+      <p class="text-brand-muted text-lg mt-6 max-w-xl mx-auto">
+        Keine Zettelwirtschaft mehr. Kein verlorener Auftrag. Keine unbezahlte Rechnung.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Feature Cards -->
+      <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-brand-orange/20 flex items-center justify-center mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+        </div>
+        <h3 class="font-heading font-bold text-xl mb-3">Auftragsmanagement</h3>
+        <p class="text-brand-muted leading-relaxed">Erstelle, plane und verfolge alle Aufträge in Echtzeit. Dein gesamtes Team sieht immer den aktuellen Stand.</p>
+      </div>
+
+      <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-brand-orange/20 flex items-center justify-center mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+          </svg>
+        </div>
+        <h3 class="font-heading font-bold text-xl mb-3">Angebote & Rechnungen</h3>
+        <p class="text-brand-muted leading-relaxed">Professionelle Angebote in Minuten erstellen. Mit einem Klick zur Rechnung — GoBD-konform und DATEV-ready.</p>
+      </div>
+
+      <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-brand-orange/20 flex items-center justify-center mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+        </div>
+        <h3 class="font-heading font-bold text-xl mb-3">Teamplanung</h3>
+        <p class="text-brand-muted leading-relaxed">Weise Aufgaben direkt per App zu. Mitarbeiter sehen ihre Einsätze, Routen und Dokumente auf dem Smartphone.</p>
+      </div>
+
+      <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-brand-orange/20 flex items-center justify-center mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+        <h3 class="font-heading font-bold text-xl mb-3">Intelligente Zeitplanung</h3>
+        <p class="text-brand-muted leading-relaxed">KI-gestützte Kapazitätsplanung. ToolTime erkennt Engpässe und schlägt optimale Termine automatisch vor.</p>
+      </div>
+
+      <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-brand-orange/20 flex items-center justify-center mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+          </svg>
+        </div>
+        <h3 class="font-heading font-bold text-xl mb-3">Echtzeit-Reporting</h3>
+        <p class="text-brand-muted leading-relaxed">Umsatz, offene Rechnungen, Mitarbeiterauslastung — alle Kennzahlen deines Betriebs auf einen Blick.</p>
+      </div>
+
+      <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+        <div class="w-12 h-12 rounded-xl bg-brand-orange/20 flex items-center justify-center mb-6">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <h3 class="font-heading font-bold text-xl mb-3">DSGVO & GoBD konform</h3>
+        <p class="text-brand-muted leading-relaxed">Datenschutz made in Germany. Alle Daten auf deutschen Servern, revisionssicher und steuerprüfungssicher.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="py-28 px-4 bg-[#0A0A0A] border-y border-[#1A1A1A]">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-20">
+        <span class="text-brand-orange font-semibold text-sm uppercase tracking-widest">So funktionierts</span>
+        <h2 class="font-heading font-black text-4xl md:text-6xl mt-4">
+          In 3 Schritten startklar
+        </h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+        <!-- Connector line -->
+        <div class="hidden md:block absolute top-8 left-1/3 right-1/3 h-px bg-gradient-to-r from-transparent via-brand-orange/40 to-transparent"></div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-2xl bg-brand-orange flex items-center justify-center mx-auto mb-6 shadow-[0_0_24px_rgba(249,115,22,0.4)]">
+            <span class="font-heading font-black text-2xl text-white">1</span>
+          </div>
+          <h3 class="font-heading font-bold text-xl mb-3">Konto erstellen</h3>
+          <p class="text-brand-muted leading-relaxed">In 2 Minuten angemeldet. Kein Vertrag, keine Kreditkarte nötig für die 14-Tage-Testphase.</p>
+        </div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-2xl bg-[#1E1E1E] border-2 border-brand-orange flex items-center justify-center mx-auto mb-6">
+            <span class="font-heading font-black text-2xl text-brand-orange">2</span>
+          </div>
+          <h3 class="font-heading font-bold text-xl mb-3">Betrieb einrichten</h3>
+          <p class="text-brand-muted leading-relaxed">Mitarbeiter einladen, Leistungen hinterlegen, Logo hochladen. Fertig — dauert keine 15 Minuten.</p>
+        </div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-2xl bg-[#1E1E1E] border-2 border-brand-orange flex items-center justify-center mx-auto mb-6">
+            <span class="font-heading font-black text-2xl text-brand-orange">3</span>
+          </div>
+          <h3 class="font-heading font-bold text-xl mb-3">Loslegen</h3>
+          <p class="text-brand-muted leading-relaxed">Ersten Auftrag anlegen, Rechnung schreiben, Team benachrichtigen. Dein Betrieb läuft digital.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="py-28 px-4 max-w-6xl mx-auto">
+    <div class="text-center mb-20">
+      <span class="text-brand-orange font-semibold text-sm uppercase tracking-widest">Preise</span>
+      <h2 class="font-heading font-black text-4xl md:text-6xl mt-4">Klar. Einfach. Fair.</h2>
+      <p class="text-brand-muted text-lg mt-6">Alle Preise zzgl. MwSt. Jederzeit kündbar.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Starter -->
+      <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+        <div class="mb-8">
+          <div class="text-brand-muted text-sm font-semibold uppercase tracking-widest mb-2">Starter</div>
+          <div class="flex items-end gap-1">
+            <span class="font-heading font-black text-5xl">€ 49</span>
+            <span class="text-brand-muted text-lg mb-1">/Monat</span>
+          </div>
+          <div class="text-brand-muted text-sm mt-2">bis 3 Nutzer</div>
+        </div>
+        <ul class="space-y-4 mb-10">
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            Auftragsmanagement
+          </li>
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            Angebote & Rechnungen
+          </li>
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            Mobile App
+          </li>
+          <li class="flex items-center gap-3 text-sm text-brand-muted">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="#555" stroke-width="2" stroke-linecap="round"/></svg>
+            KI-Planung
+          </li>
+          <li class="flex items-center gap-3 text-sm text-brand-muted">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="#555" stroke-width="2" stroke-linecap="round"/></svg>
+            DATEV-Export
+          </li>
+        </ul>
+        <a href="#cta" class="block w-full text-center border border-brand-orange text-brand-orange hover:bg-brand-orange hover:text-white font-bold py-3 rounded-xl transition-all duration-200 cursor-pointer">
+          Jetzt starten
+        </a>
+      </div>
+
+      <!-- Pro (highlighted) -->
+      <div class="card-hover bg-brand-orange/5 border-2 border-brand-orange rounded-2xl p-8 cursor-pointer relative shadow-[0_0_40px_rgba(249,115,22,0.15)]">
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-orange text-white text-xs font-bold px-4 py-1.5 rounded-full">BELIEBTESTER PLAN</div>
+        <div class="mb-8">
+          <div class="text-brand-orange text-sm font-semibold uppercase tracking-widest mb-2">Pro</div>
+          <div class="flex items-end gap-1">
+            <span class="font-heading font-black text-5xl">€ 99</span>
+            <span class="text-brand-muted text-lg mb-1">/Monat</span>
+          </div>
+          <div class="text-brand-muted text-sm mt-2">bis 10 Nutzer</div>
+        </div>
+        <ul class="space-y-4 mb-10">
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            Alles aus Starter
+          </li>
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            KI-Auftragsplanung
+          </li>
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            DATEV-Export
+          </li>
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            Zeiterfassung
+          </li>
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            Prioritäts-Support
+          </li>
+        </ul>
+        <a href="#cta" class="block w-full text-center bg-brand-orange hover:bg-orange-500 text-white font-bold py-3 rounded-xl transition-all duration-200 cursor-pointer shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+          Jetzt starten
+        </a>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+        <div class="mb-8">
+          <div class="text-brand-muted text-sm font-semibold uppercase tracking-widest mb-2">Enterprise</div>
+          <div class="flex items-end gap-1">
+            <span class="font-heading font-black text-5xl">Individuell</span>
+          </div>
+          <div class="text-brand-muted text-sm mt-2">unbegrenzte Nutzer</div>
+        </div>
+        <ul class="space-y-4 mb-10">
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            Alles aus Pro
+          </li>
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            Dedizierter Account Manager
+          </li>
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            Custom Onboarding & Schulung
+          </li>
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            API & Integrationen
+          </li>
+          <li class="flex items-center gap-3 text-sm">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#F97316" aria-hidden="true"><path d="M3 8l3 3 7-7" stroke="#F97316" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+            SLA-Garantie
+          </li>
+        </ul>
+        <a href="mailto:sales@tooltime.de" class="block w-full text-center border border-[#333] hover:border-[#555] text-white font-bold py-3 rounded-xl transition-all duration-200 cursor-pointer">
+          Kontakt aufnehmen
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews" class="py-28 px-4 bg-[#0A0A0A] border-y border-[#1A1A1A]">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-20">
+        <span class="text-brand-orange font-semibold text-sm uppercase tracking-widest">Bewertungen</span>
+        <h2 class="font-heading font-black text-4xl md:text-6xl mt-4">Was Handwerker sagen</h2>
+        <div class="flex items-center justify-center gap-2 mt-6">
+          <div class="flex">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+          </div>
+          <span class="font-heading font-bold text-xl">4,8 / 5</span>
+          <span class="text-brand-muted">(1.240 Bewertungen)</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+          <div class="flex mb-4">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+          </div>
+          <p class="text-[#D1D5DB] leading-relaxed mb-6">"Endlich keine Zettelwirtschaft mehr. Wir haben unsere Rechnungsstellung von 3 Stunden auf 20 Minuten pro Woche reduziert. Absolut empfehlenswert!"</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-brand-orange/20 flex items-center justify-center font-heading font-bold text-brand-orange">TK</div>
+            <div>
+              <div class="font-semibold text-sm">Thomas K.</div>
+              <div class="text-brand-muted text-xs">Elektromeister, München</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+          <div class="flex mb-4">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+          </div>
+          <p class="text-[#D1D5DB] leading-relaxed mb-6">"Die App läuft auf jedem Handy meiner Mitarbeiter einwandfrei. Aufträge zuweisen, Fotos hochladen, Unterschrift einholen — alles direkt vor Ort. Super!"</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-brand-orange/20 flex items-center justify-center font-heading font-bold text-brand-orange">SR</div>
+            <div>
+              <div class="font-semibold text-sm">Sandra R.</div>
+              <div class="text-brand-muted text-xs">Sanitärbetrieb, Hamburg</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-hover bg-[#161616] border border-[#242424] rounded-2xl p-8 cursor-pointer">
+          <div class="flex mb-4">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="#FBBF24" aria-hidden="true"><path d="M10 1l2.39 4.84L18 6.85l-4 3.9.94 5.5L10 13.77 5.06 16.25 6 10.75 2 6.85l5.61-.01L10 1z"/></svg>
+          </div>
+          <p class="text-[#D1D5DB] leading-relaxed mb-6">"Unser DATEV-Steuerberater war begeistert. Der Export klappt reibungslos und spart uns jeden Monat eine Menge Arbeit. Der Umstieg hat sich sofort gelohnt."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-brand-orange/20 flex items-center justify-center font-heading font-bold text-brand-orange">MW</div>
+            <div>
+              <div class="font-semibold text-sm">Markus W.</div>
+              <div class="text-brand-muted text-xs">Dachdeckermeister, Berlin</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section id="cta" class="py-32 px-4 relative overflow-hidden">
+    <div class="absolute inset-0 grid-bg"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-brand-orange/8 rounded-full blur-[100px] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-3xl mx-auto text-center">
+      <h2 class="font-heading font-black text-4xl md:text-6xl leading-tight mb-8">
+        Starte noch heute.<br/>
+        <span class="text-brand-orange">Kostenlos.</span>
+      </h2>
+      <p class="text-brand-muted text-xl mb-12 leading-relaxed">
+        14 Tage alle Features gratis testen. Kein Vertrag, keine Kreditkarte.
+        Über 12.000 Betriebe vertrauen ToolTime.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="#" class="bg-brand-orange hover:bg-orange-500 text-white font-bold text-lg px-10 py-5 rounded-2xl transition-all duration-200 cursor-pointer shadow-[0_0_40px_rgba(249,115,22,0.5)] hover:shadow-[0_0_60px_rgba(249,115,22,0.7)]">
+          Jetzt kostenlos starten
+        </a>
+        <a href="#" class="border border-[#333] hover:border-[#555] text-white font-semibold text-lg px-10 py-5 rounded-2xl transition-all duration-200 cursor-pointer">
+          Demo buchen
+        </a>
+      </div>
+      <p class="text-brand-muted text-sm mt-8">Kein Risiko · Kein Vertrag · Jederzeit kündbar</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-[#1A1A1A] py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+        <div class="col-span-2">
+          <div class="flex items-center gap-2 mb-4">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="8" fill="#F97316"/>
+              <path d="M8 24L14 10L18 18L21 14L24 24" stroke="#0D0D0D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="font-heading font-bold text-lg">ToolTime</span>
+          </div>
+          <p class="text-brand-muted text-sm leading-relaxed max-w-xs">Die All-in-One-Software für Handwerksbetriebe. Made in Germany.</p>
+        </div>
+        <div>
+          <div class="font-semibold text-sm mb-4">Produkt</div>
+          <ul class="space-y-3 text-sm text-brand-muted">
+            <li><a href="#" class="hover:text-white transition-colors cursor-pointer">Features</a></li>
+            <li><a href="#" class="hover:text-white transition-colors cursor-pointer">Preise</a></li>
+            <li><a href="#" class="hover:text-white transition-colors cursor-pointer">Changelog</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-semibold text-sm mb-4">Unternehmen</div>
+          <ul class="space-y-3 text-sm text-brand-muted">
+            <li><a href="#" class="hover:text-white transition-colors cursor-pointer">Über uns</a></li>
+            <li><a href="#" class="hover:text-white transition-colors cursor-pointer">Blog</a></li>
+            <li><a href="#" class="hover:text-white transition-colors cursor-pointer">Karriere</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-semibold text-sm mb-4">Rechtliches</div>
+          <ul class="space-y-3 text-sm text-brand-muted">
+            <li><a href="#" class="hover:text-white transition-colors cursor-pointer">Datenschutz</a></li>
+            <li><a href="#" class="hover:text-white transition-colors cursor-pointer">Impressum</a></li>
+            <li><a href="#" class="hover:text-white transition-colors cursor-pointer">AGB</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-[#1A1A1A] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-brand-muted text-sm">© 2026 ToolTime GmbH. Alle Rechte vorbehalten.</p>
+        <p class="text-brand-muted text-sm">Entwickelt mit Sorgfalt in Berlin, Deutschland</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
