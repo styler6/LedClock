@@ -70,6 +70,21 @@ pnpm test         # Vitest-Unit-Tests (aktuell: packages/domain)
 pnpm lint         # ESLint
 ```
 
+### Datenbank-Regressions-Test (RLS + Kernlogik)
+
+`supabase/tests/rls_and_logic_test.sql` prüft gegen eine frisch geseedete DB die
+Mandanten-Isolation, den Rollen-Schutz, die Dokumentennummerierung und den
+Geräte-Überlappungs-Constraint — indem es (wie PostgREST) verschiedene Nutzer per
+`request.jwt.claims` impersoniert:
+
+```bash
+pnpm db:reset
+psql "$(supabase status -o env | grep DB_URL | cut -d= -f2- | tr -d '"')" \
+  -f supabase/tests/rls_and_logic_test.sql
+```
+
+Erwartet: alle Zählwerte wie kommentiert und am Ende `ALLE TESTS DURCHLAUFEN.`
+
 ## Architektur-Hinweise
 
 - **Multi-Tenancy**: Jede Handwerksfirma ist ein Tenant (`companies`-Tabelle), durchgesetzt per
