@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Turborepo
+.turbo/
+
+# Expo / React Native
+.expo/
+apps/mobile/dist/
+web-build/
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs & misc
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.DS_Store
+coverage/

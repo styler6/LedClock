@@ -1,0 +1,13 @@
+{
+  "name": "@handwerker/config",
+  "version": "0.1.0",
+  "private": true,
+  "main": "eslint-preset.js",
+  "files": [
+    "eslint-preset.js",
+    "tsconfig"
+  ],
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

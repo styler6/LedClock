@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "declaration": false,
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "@handwerker/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@handwerker/domain": ["../../packages/domain/src/index.ts"],
+      "@handwerker/api-client": ["../../packages/api-client/src/index.ts"],
+      "@handwerker/pdf": ["../../packages/pdf/src/index.ts"],
+      "@handwerker/ui": ["../../packages/ui/src/index.ts"]
+    }
+  }
+}
