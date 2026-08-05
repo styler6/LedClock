@@ -1,0 +1,31 @@
+# Handwerker-Plattform – Web-App als Container.
+#
+# Startet die Next.js-Website. Das Supabase-Backend (Datenbank/Auth/Storage)
+# wird NICHT hier betrieben – trage in .env die URL + Keys deines Supabase-
+# Projekts ein (Supabase Cloud oder eine selbst gehostete Instanz).
+#
+#   cp .env.example .env   # dann .env mit echten Werten füllen
+#   docker compose up -d --build
+#
+# Website danach erreichbar unter http://<mac-mini-ip>:3000
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: handwerker-web:latest
+    container_name: handwerker-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
